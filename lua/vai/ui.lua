@@ -91,7 +91,7 @@ function M.set_label(buf, line, label, hl)
 
 	-- Place label at start of line, overlaying content
 	vim.api.nvim_buf_set_extmark(buf, ns_id, line - 1, 0, {
-		virt_text = { { " " .. label .. " ", hl } },
+		virt_text = { { label, hl } },
 		virt_text_pos = "overlay",
 		priority = 1000,
 	})
