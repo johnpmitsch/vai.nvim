@@ -47,7 +47,7 @@ Works in normal, visual, and operator-pending modes.
 **Defaults ptimized for speed:**
 - Only 19 easy letters: `a s d f g j k l w e r t y u i o c v n`
 - Dropped hard-to-reach: `q z x b m p h`
-- hundreds of combos, prioritized by typing ease
+- Hundreds of combos, prioritized by typing ease
 - Rotating pastel colors for easy visual tracking
 
 **Smart mapping:**
