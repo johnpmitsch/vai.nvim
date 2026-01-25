@@ -2,14 +2,12 @@
 
 local M = {}
 
--- Easy letters only (drop q, z, x, b, m, p - hard to reach)
-local easy_letters = {
+local letters = {
 	"a",
 	"s",
 	"d",
 	"f",
 	"g",
-	"h",
 	"j",
 	"k",
 	"l", -- home row (9)
@@ -40,7 +38,6 @@ local function build_combo_list()
 		"ll",
 		"aa",
 		"gg",
-		"hh",
 		"ee",
 		"ii",
 		"rr",
@@ -77,8 +74,6 @@ local function build_combo_list()
 		"cv",
 		"vc",
 		-- Right hand rolls
-		"hj",
-		"jh",
 		"jk",
 		"kj",
 		"kl",
@@ -114,10 +109,6 @@ local function build_combo_list()
 		"et",
 		"te",
 		-- Right hand
-		"hk",
-		"kh",
-		"hl",
-		"lh",
 		"jl",
 		"lj",
 		"yi",
@@ -143,10 +134,6 @@ local function build_combo_list()
 		"kd",
 		"gj",
 		"jg",
-		"gh",
-		"hg",
-		"fh",
-		"hf",
 		"ru",
 		"ur",
 		"ri",
@@ -172,8 +159,8 @@ local function build_combo_list()
 		used[combo] = true
 	end
 
-	for _, c1 in ipairs(easy_letters) do
-		for _, c2 in ipairs(easy_letters) do
+	for _, c1 in ipairs(letters) do
+		for _, c2 in ipairs(letters) do
 			local combo = c1 .. c2
 			if not used[combo] then
 				table.insert(combos, combo)
@@ -187,8 +174,7 @@ end
 
 M.defaults = {
 	trigger = "\\",
-	-- Easy letters only (no q, z, x, b, m, p)
-	labels = easy_letters,
+	labels = letters,
 	-- Pre-built combo list ordered by typing ease
 	combos = build_combo_list(),
 	-- Sweet spot: where double letters should land (lines from cursor)
