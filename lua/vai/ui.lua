@@ -11,7 +11,7 @@ function M.setup_highlights()
 	-- Label highlight: dark gray background with purple text to match theme
 	vim.api.nvim_set_hl(0, "VaiLabel", {
 		fg = "#00ff00",
-		bg = "#000000",
+		bg = "#d8a0ff",
 		bold = true,
 	})
 
