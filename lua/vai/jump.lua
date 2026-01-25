@@ -1,5 +1,8 @@
 -- vai.nvim jump logic and input handling
--- vai.nvim jump logic and input handling
+
+local config = require("vai.config")
+local labels = require("vai.labels")
+local ui = require("vai.ui")
 
 local M = {}
 
@@ -32,9 +35,6 @@ end
 
 --- Main entry point: start the jump sequence
 function M.start()
-	local config = require("vai.config")
-	local labels = require("vai.labels")
-	local ui = require("vai.ui")
 	-- Build groups for visible lines
 	local groups = labels.build_groups()
 
@@ -126,7 +126,6 @@ end
 ---@param line_char string
 ---@return number|nil
 function M.resolve_line(group, line_char)
-	local config = require("vai.config")
 	local line_labels = config.get_labels(13)
 
 	-- Find the index of this label
