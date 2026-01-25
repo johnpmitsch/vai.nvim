@@ -1,7 +1,5 @@
 -- vai.nvim label generation and math
 
-local config = require("vai.config")
-
 local M = {}
 
 --- Get visible line range in current window
@@ -17,6 +15,7 @@ end
 --- Returns a table mapping group_label -> { above = {lines}, below = {lines} }
 ---@return table<string, { above: number[], below: number[] }>
 function M.build_groups()
+	local config = require("vai.config")
 	local first_line, last_line, cursor_line = M.get_visible_range()
 	local labels = config.get_labels(13)
 	local lines_per_group = 13

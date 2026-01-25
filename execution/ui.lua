@@ -1,7 +1,5 @@
 -- vai.nvim UI rendering with extmarks
 
-local config = require("vai.config")
-
 local M = {}
 
 local ns_id = vim.api.nvim_create_namespace("vai")
@@ -30,6 +28,7 @@ end
 --- Show group labels in the gutter
 ---@param groups table<string, { above: number[], below: number[] }>
 function M.show_group_labels(groups)
+	local config = require("vai.config")
 	local buf = vim.api.nvim_get_current_buf()
 	local hl = config.options.highlights.label
 
@@ -50,6 +49,7 @@ end
 --- Below: closest gets 'a', farthest gets last label (normal)
 ---@param group_lines { above: number[], below: number[] }
 function M.show_line_labels(group_lines)
+	local config = require("vai.config")
 	local buf = vim.api.nvim_get_current_buf()
 	local labels = config.get_labels(13)
 	local hl = config.options.highlights.label
@@ -99,6 +99,7 @@ end
 
 --- Dim all lines except the cursor line
 function M.dim_buffer()
+	local config = require("vai.config")
 	local buf = vim.api.nvim_get_current_buf()
 	local first_line = vim.fn.line("w0")
 	local last_line = vim.fn.line("w$")
