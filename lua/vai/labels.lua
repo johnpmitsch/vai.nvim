@@ -14,69 +14,81 @@ function M.get_visible_range()
 end
 
 --- Build line labels for all visible lines
+--- Maps easiest combos to sweet spot distances, then fills outward
 --- Returns a table mapping two-letter label -> line number
 ---@return table<string, number>
 function M.build_labels()
 	local first_line, last_line, cursor_line = M.get_visible_range()
-	local labels = config.options.labels
-	local group_labels = {}
-	local line_labels_above = {}
-	local line_labels_below = {}
-
-	-- First 13 labels for groups
-	for i = 1, 13 do
-		if labels[i] then
-			group_labels[i] = labels[i]
-		end
-	end
-
-	-- Split 26 labels: first 13 for above, last 13 for below
-	for i = 1, 13 do
-		if labels[i] then
-			line_labels_above[i] = labels[i]
-		end
-	end
-	for i = 14, 26 do
-		if labels[i] then
-			line_labels_below[i - 13] = labels[i]
-		end
-	end
+	local combos = config.options.combos
+	local sweet_start = config.options.sweet_spot_start or 6
+	local sweet_end = config.options.sweet_spot_end or 15
 
 	local result = {}
-	local lines_per_group = 13
+	local combo_idx = 1
 
-	-- Build labels for lines above cursor
-	local above_idx = 0
-	for line = cursor_line - 1, first_line, -1 do
-		above_idx = above_idx + 1
-		local group_num = math.ceil(above_idx / lines_per_group)
-		local line_in_group = ((above_idx - 1) % lines_per_group) + 1
+	-- Count available lines in each direction
+	local lines_above = cursor_line - first_line
+	local lines_below = last_line - cursor_line
 
-		if group_num > #group_labels or line_in_group > #line_labels_above then
-			break
+	-- Build line lists: reorder so sweet spot comes first
+	-- Sweet spot (6-15), then close (1-5), then far (16+)
+	local above_lines = {}
+	local below_lines = {}
+
+	-- Sweet spot lines first (6-15 from cursor)
+	for dist = sweet_start, sweet_end do
+		if cursor_line - dist >= first_line then
+			table.insert(above_lines, cursor_line - dist)
 		end
-
-		-- For above: closest line gets last label in group (r), farthest gets first (a)
-		local reversed_line_idx = lines_per_group - line_in_group + 1
-		if reversed_line_idx <= #line_labels_above then
-			local label = group_labels[group_num] .. line_labels_above[reversed_line_idx]
-			result[label] = line
+		if cursor_line + dist <= last_line then
+			table.insert(below_lines, cursor_line + dist)
 		end
 	end
 
-	-- Build labels for lines below cursor
-	local below_idx = 0
-	for line = cursor_line + 1, last_line do
-		below_idx = below_idx + 1
-		local group_num = math.ceil(below_idx / lines_per_group)
-		local line_in_group = ((below_idx - 1) % lines_per_group) + 1
-
-		if group_num > #group_labels or line_in_group > #line_labels_below then
-			break
+	-- Close lines (1-5 from cursor)
+	for dist = 1, sweet_start - 1 do
+		if cursor_line - dist >= first_line then
+			table.insert(above_lines, cursor_line - dist)
 		end
+		if cursor_line + dist <= last_line then
+			table.insert(below_lines, cursor_line + dist)
+		end
+	end
 
-		local label = group_labels[group_num] .. line_labels_below[line_in_group]
-		result[label] = line
+	-- Far lines (16+ from cursor)
+	for dist = sweet_end + 1, math.max(lines_above, lines_below) do
+		if cursor_line - dist >= first_line then
+			table.insert(above_lines, cursor_line - dist)
+		end
+		if cursor_line + dist <= last_line then
+			table.insert(below_lines, cursor_line + dist)
+		end
+	end
+
+	-- Interleave above and below, assigning easiest combos first
+	local above_idx = 1
+	local below_idx = 1
+	local assign_below = true -- start with below (more common to jump down)
+
+	while combo_idx <= #combos and (above_idx <= #above_lines or below_idx <= #below_lines) do
+		if assign_below and below_idx <= #below_lines then
+			result[combos[combo_idx]] = below_lines[below_idx]
+			below_idx = below_idx + 1
+			combo_idx = combo_idx + 1
+		elseif not assign_below and above_idx <= #above_lines then
+			result[combos[combo_idx]] = above_lines[above_idx]
+			above_idx = above_idx + 1
+			combo_idx = combo_idx + 1
+		elseif below_idx <= #below_lines then
+			result[combos[combo_idx]] = below_lines[below_idx]
+			below_idx = below_idx + 1
+			combo_idx = combo_idx + 1
+		elseif above_idx <= #above_lines then
+			result[combos[combo_idx]] = above_lines[above_idx]
+			above_idx = above_idx + 1
+			combo_idx = combo_idx + 1
+		end
+		assign_below = not assign_below
 	end
 
 	return result

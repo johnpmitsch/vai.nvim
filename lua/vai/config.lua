@@ -2,38 +2,199 @@
 
 local M = {}
 
+-- Easy letters only (drop q, z, x, b, m, p - hard to reach)
+local easy_letters = {
+	"a",
+	"s",
+	"d",
+	"f",
+	"g",
+	"h",
+	"j",
+	"k",
+	"l", -- home row (9)
+	"w",
+	"e",
+	"r",
+	"t",
+	"y",
+	"u",
+	"i",
+	"o", -- top row easy (8)
+	"c",
+	"v",
+	"n", -- bottom row easy (3)
+}
+
+-- Build combo list ordered by ease of typing
+local function build_combo_list()
+	local combos = {}
+
+	-- Tier S: Double letters (easiest)
+	local doubles = {
+		"ff",
+		"jj",
+		"dd",
+		"kk",
+		"ss",
+		"ll",
+		"aa",
+		"gg",
+		"hh",
+		"ee",
+		"ii",
+		"rr",
+		"uu",
+		"ww",
+		"oo",
+		"tt",
+		"yy",
+		"cc",
+		"vv",
+		"nn",
+	}
+	for _, combo in ipairs(doubles) do
+		table.insert(combos, combo)
+	end
+
+	-- Tier A: Same-hand rolls (adjacent fingers, very fast)
+	local rolls = {
+		-- Left hand rolls
+		"as",
+		"sa",
+		"sd",
+		"ds",
+		"df",
+		"fd",
+		"fg",
+		"gf",
+		"we",
+		"ew",
+		"er",
+		"er",
+		"rt",
+		"tr",
+		"cv",
+		"vc",
+		-- Right hand rolls
+		"hj",
+		"jh",
+		"jk",
+		"kj",
+		"kl",
+		"lk",
+		"yu",
+		"uy",
+		"ui",
+		"iu",
+		"io",
+		"oi",
+	}
+	for _, combo in ipairs(rolls) do
+		table.insert(combos, combo)
+	end
+
+	-- Tier B: Same-hand non-adjacent (still easy, one hand)
+	local same_hand = {
+		-- Left hand
+		"af",
+		"fa",
+		"ag",
+		"ga",
+		"sf",
+		"fs",
+		"sg",
+		"gs",
+		"dg",
+		"gd",
+		"wr",
+		"rw",
+		"wt",
+		"tw",
+		"et",
+		"te",
+		-- Right hand
+		"hk",
+		"kh",
+		"hl",
+		"lh",
+		"jl",
+		"lj",
+		"yi",
+		"iy",
+		"yo",
+		"oy",
+		"uo",
+		"ou",
+	}
+	for _, combo in ipairs(same_hand) do
+		table.insert(combos, combo)
+	end
+
+	-- Tier C: Cross-hand easy (index/middle fingers)
+	local cross_easy = {
+		"fj",
+		"jf",
+		"fk",
+		"kf",
+		"dj",
+		"jd",
+		"dk",
+		"kd",
+		"gj",
+		"jg",
+		"gh",
+		"hg",
+		"fh",
+		"hf",
+		"ru",
+		"ur",
+		"ri",
+		"ir",
+		"eu",
+		"ue",
+		"ei",
+		"ie",
+		"ty",
+		"yt",
+		"tu",
+		"ut",
+		"ry",
+		"yr",
+	}
+	for _, combo in ipairs(cross_easy) do
+		table.insert(combos, combo)
+	end
+
+	-- Tier D: Fill remaining combos (all other combinations)
+	local used = {}
+	for _, combo in ipairs(combos) do
+		used[combo] = true
+	end
+
+	for _, c1 in ipairs(easy_letters) do
+		for _, c2 in ipairs(easy_letters) do
+			local combo = c1 .. c2
+			if not used[combo] then
+				table.insert(combos, combo)
+				used[combo] = true
+			end
+		end
+	end
+
+	return combos
+end
+
 M.defaults = {
 	trigger = "\\",
-	labels = {
-		"a",
-		"s",
-		"d",
-		"f",
-		"g",
-		"h",
-		"j",
-		"k",
-		"l",
-		"q",
-		"w",
-		"e",
-		"r",
-		"t",
-		"y",
-		"u",
-		"i",
-		"o",
-		"p",
-		"z",
-		"x",
-		"c",
-		"v",
-		"b",
-		"n",
-		"m",
-	},
+	-- Easy letters only (no q, z, x, b, m, p)
+	labels = easy_letters,
+	-- Pre-built combo list ordered by typing ease
+	combos = build_combo_list(),
+	-- Sweet spot: where double letters should land (lines from cursor)
+	sweet_spot_start = 6,
+	sweet_spot_end = 15,
 	highlights = {
-		label = "VaiLabel",
 		dim = "VaiDim",
 	},
 }
@@ -44,18 +205,10 @@ M.options = {}
 ---@param opts? table
 function M.setup(opts)
 	M.options = vim.tbl_deep_extend("force", {}, M.defaults, opts or {})
-end
-
---- Get the first n labels (used for groups and lines)
----@param n? number defaults to 13
----@return string[]
-function M.get_labels(n)
-	n = n or 13
-	local result = {}
-	for i = 1, math.min(n, #M.options.labels) do
-		result[i] = M.options.labels[i]
+	-- Rebuild combos if labels changed
+	if opts and opts.labels then
+		M.options.combos = build_combo_list()
 	end
-	return result
 end
 
 return M
