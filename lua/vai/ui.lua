@@ -10,8 +10,8 @@ local ns_id = vim.api.nvim_create_namespace("vai")
 function M.setup_highlights()
 	-- Label highlight: dark gray background with purple text to match theme
 	vim.api.nvim_set_hl(0, "VaiLabel", {
-		fg = "#c792ea",
-		bg = "#1a1a1a",
+		fg = "#00ff00",
+		bg = "#000000",
 		bold = true,
 	})
 
@@ -91,7 +91,7 @@ function M.set_label(buf, line, label, hl)
 
 	-- Place label at start of line, overlaying content
 	vim.api.nvim_buf_set_extmark(buf, ns_id, line - 1, 0, {
-		virt_text = { { label, hl } },
+		virt_text = { { " " .. label .. " ", hl } },
 		virt_text_pos = "overlay",
 		priority = 1000,
 	})
