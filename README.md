@@ -26,7 +26,7 @@ jk → line -7
 ```lua
 -- lazy.nvim
 {
-  'yourusername/vai.nvim',
+  'johnpmitsch/vai.nvim',
   config = function()
     require('vai').setup()
   end,
