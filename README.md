@@ -2,8 +2,6 @@
 
 Jump to any visible line with two keystrokes. No line numbers needed.
 
-*"vai" means "go" in Portuguese.*
-
 ## How it works
 
 Press `\` → type any two-letter combo → jump to that line.
