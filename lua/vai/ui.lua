@@ -8,9 +8,9 @@ local ns_id = vim.api.nvim_create_namespace("vai")
 
 --- Setup highlight groups
 function M.setup_highlights()
-	-- Label highlight: dark gray background with hot pink text
+	-- Label highlight: dark gray background with purple text to match theme
 	vim.api.nvim_set_hl(0, "VaiLabel", {
-		fg = "#ff007c",
+		fg = "#c792ea",
 		bg = "#1a1a1a",
 		bold = true,
 	})
@@ -89,11 +89,10 @@ function M.set_label(buf, line, label, hl)
 		return
 	end
 
-	-- Place label in the sign/number column area using sign_text
-	-- Pad with space for better centering (sign_text is 2 chars wide)
+	-- Place label at start of line, overlaying content
 	vim.api.nvim_buf_set_extmark(buf, ns_id, line - 1, 0, {
-		sign_text = " " .. label,
-		sign_hl_group = hl,
+		virt_text = { { label, hl } },
+		virt_text_pos = "overlay",
 		priority = 1000,
 	})
 end
