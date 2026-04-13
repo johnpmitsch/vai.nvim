@@ -20,6 +20,20 @@ local function get_char()
 	return char
 end
 
+--- Filter label_map to only labels starting with prefix
+---@param label_map table<string, number>
+---@param prefix string
+---@return table<string, number>
+local function filter_labels_by_prefix(label_map, prefix)
+	local filtered = {}
+	for label, line in pairs(label_map) do
+		if label:sub(1, #prefix) == prefix then
+			filtered[label] = line
+		end
+	end
+	return filtered
+end
+
 --- Main entry point: start the jump sequence
 function M.start()
 	-- Build all labels
@@ -43,6 +57,21 @@ function M.start()
 		vim.cmd("redraw")
 		return
 	end
+
+	-- Filter to matching labels and preview them
+	local matching = filter_labels_by_prefix(label_map, char1)
+	if vim.tbl_isempty(matching) then
+		ui.clear()
+		vim.cmd("redraw")
+		vim.notify('vai: no labels starting with "' .. char1 .. '"', vim.log.levels.WARN)
+		return
+	end
+
+	-- Highlight all lines that match the first character
+	for _, line in pairs(matching) do
+		ui.show_preview(line)
+	end
+	vim.cmd("redraw")
 
 	-- Get second character
 	local char2 = get_char()

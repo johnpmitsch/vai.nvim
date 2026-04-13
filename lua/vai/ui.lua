@@ -5,6 +5,7 @@ local config = require("vai.config")
 local M = {}
 
 local ns_id = vim.api.nvim_create_namespace("vai")
+local preview_ns_id = vim.api.nvim_create_namespace("vai_preview")
 
 -- Bright pastel colors for label rotation
 local pastel_colors = {
@@ -51,12 +52,38 @@ function M.setup_highlights()
 	vim.api.nvim_set_hl(0, "VaiDim", {
 		fg = "#555555",
 	})
+
+	-- Preview highlight for target line
+	vim.api.nvim_set_hl(0, "VaiPreview", {
+		bg = "#3a3a00", -- subtle yellow background
+	})
 end
 
 --- Clear all vai extmarks
 function M.clear()
 	local buf = vim.api.nvim_get_current_buf()
 	vim.api.nvim_buf_clear_namespace(buf, ns_id, 0, -1)
+	vim.api.nvim_buf_clear_namespace(buf, preview_ns_id, 0, -1)
+end
+
+--- Clear only preview highlight
+function M.clear_preview()
+	local buf = vim.api.nvim_get_current_buf()
+	vim.api.nvim_buf_clear_namespace(buf, preview_ns_id, 0, -1)
+end
+
+--- Get the indentation level of a line (number of leading whitespace chars)
+---@param buf number
+---@param line number 1-indexed
+---@return number indent column position after indentation
+local function get_indent_col(buf, line)
+	local line_content = vim.api.nvim_buf_get_lines(buf, line - 1, line, false)[1]
+	if not line_content then
+		return 0
+	end
+
+	local indent = line_content:match("^%s*")
+	return indent and #indent or 0
 end
 
 --- Show all labels on their lines
@@ -81,7 +108,7 @@ function M.show_labels(label_map)
 	end
 end
 
---- Set a label on a specific line
+--- Set a label on a specific line (at column 0)
 ---@param buf number
 ---@param line number 1-indexed line number
 ---@param label string
@@ -98,6 +125,22 @@ function M.set_label(buf, line, label, hl)
 		virt_text = { { label, hl } },
 		virt_text_pos = "overlay",
 		priority = 1000,
+	})
+end
+
+--- Highlight a line as preview target
+---@param line number 1-indexed line number
+function M.show_preview(line)
+	local buf = vim.api.nvim_get_current_buf()
+	local line_count = vim.api.nvim_buf_line_count(buf)
+	if line < 1 or line > line_count then
+		return
+	end
+
+	-- Use line_hl_group to highlight the entire line
+	vim.api.nvim_buf_set_extmark(buf, preview_ns_id, line - 1, 0, {
+		line_hl_group = "VaiPreview",
+		priority = 50,
 	})
 end
 
